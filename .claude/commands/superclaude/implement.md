@@ -1,54 +1,77 @@
----
-allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, TodoWrite, Task]
-description: "Feature and code implementation with intelligent persona activation and MCP integration"
----
+# /sc:implement
 
-# /sc:implement - Feature Implementation
+## SupaFloSho Enhanced Implementation
 
-## Purpose
-Implement features, components, and code functionality with intelligent expert activation and comprehensive development support.
+Implements features based on PRP (Product Requirements Prompt) specifications.
 
-## Usage
+## Syntax
 ```
-/sc:implement [feature-description] [--type component|api|service|feature] [--framework react|vue|express|etc] [--safe]
+/sc:implement [feature] [flags]
 ```
 
-## Arguments
-- `feature-description` - Description of what to implement
-- `--type` - Implementation type (component, api, service, feature, module)
-- `--framework` - Target framework or technology stack
-- `--safe` - Use conservative implementation approach
-- `--iterative` - Enable iterative development with validation steps
-- `--with-tests` - Include test implementation
-- `--documentation` - Generate documentation alongside implementation
+## PRP Integration
 
-## Execution
-1. Analyze implementation requirements and detect technology context
-2. Auto-activate relevant personas (frontend, backend, security, etc.)
-3. Coordinate with MCP servers (Magic for UI, Context7 for patterns, Sequential for complex logic)
-4. Generate implementation code with best practices
-5. Apply security and quality validation
-6. Provide testing recommendations and next steps
-
-## Claude Code Integration
-- Uses Write/Edit/MultiEdit for code generation and modification
-- Leverages Read and Glob for codebase analysis and context understanding
-- Applies TodoWrite for implementation progress tracking
-- Integrates Task tool for complex multi-step implementations
-- Coordinates with MCP servers for specialized functionality
-- Auto-activates appropriate personas based on implementation type
-
-## Auto-Activation Patterns
-- **Frontend**: UI components, React/Vue/Angular development
-- **Backend**: APIs, services, database integration
-- **Security**: Authentication, authorization, data protection
-- **Architecture**: System design, module structure
-- **Performance**: Optimization, scalability considerations
+This command:
+1. Reads the current project PRP
+2. Identifies relevant requirements for the feature
+3. Auto-activates appropriate personas
+4. Implements according to PRP specifications
+5. Prepares for FloSho testing
 
 ## Examples
+
+### Basic Implementation
+```bash
+/sc:implement "user authentication"
+# Reads PRP auth requirements
+# Backend persona implements API
+# Frontend persona implements UI
+# Adds test hooks for FloSho
 ```
-/sc:implement user authentication system --type feature --with-tests
-/sc:implement dashboard component --type component --framework react
-/sc:implement REST API for user management --type api --safe
-/sc:implement payment processing service --type service --iterative
+
+### With Specific Focus
+```bash
+/sc:implement "payment processing" --focus backend
+# Implements only backend components
+# Follows PRP payment specifications
+# Creates API endpoints per PRP
 ```
+
+### With Testing Preparation
+```bash
+/sc:implement "search feature" --with-tests
+# Implements search per PRP
+# Adds data-testid attributes
+# Creates FloSho test templates
+```
+
+## Flags
+
+- `--persona-[name]` - Force specific persona
+- `--focus [area]` - frontend, backend, or fullstack
+- `--with-tests` - Include FloSho test preparation
+- `--validate` - Validate against PRP after implementation
+
+## Workflow Integration
+
+1. **Pre-Implementation**:
+   - Validates PRP exists
+   - Checks implementation status
+   - Identifies dependencies
+
+2. **Implementation**:
+   - Follows PRP specifications
+   - Uses appropriate patterns
+   - Adds testing hooks
+
+3. **Post-Implementation**:
+   - Updates implementation status
+   - Prepares FloSho test scenarios
+   - Documents changes
+
+## Related Commands
+
+- `/xt:init` - Create initial PRP
+- `/sc:design` - Design before implementing
+- `/fs:flow` - Test after implementing
+- `/xt:validate` - Validate implementation

@@ -1,36 +1,75 @@
----
-allowed-tools: [Read, Glob, Task, BrowsingWeb]
-description: "Deep code, architecture, and project analysis with intelligent recommendations"
----
+# /sc:analyze
 
-# /sc:analyze - Deep Analysis
+## SupaFloSho Enhanced Analysis
 
-## Purpose
-Perform comprehensive analysis of code, architecture, performance, security, and project structure with actionable insights.
+Systematic analysis with PRP validation and evidence-based investigation.
 
-## Usage
+## Syntax
 ```
-/sc:analyze [target] [--type code|architecture|performance|security|all] [--depth shallow|medium|deep]
+/sc:analyze [target] [flags]
 ```
 
-## Arguments
-- `target` - File, directory, or concept to analyze
-- `--type` - Analysis type (code, architecture, performance, security, all)
-- `--depth` - Analysis depth level
-- `--metrics` - Include quantitative metrics
-- `--recommendations` - Provide improvement suggestions
-- `--compare` - Compare with best practices
+## PRP Integration
 
-## Execution
-1. Scan target for analysis scope
-2. Apply specialized analysis based on type
-3. Generate insights and findings
-4. Provide actionable recommendations
-5. Create visual analysis reports if applicable
+Analyzes implementations against PRP requirements:
+- Compliance with specifications
+- Coverage of user stories
+- Performance vs. targets
+- Security requirement adherence
 
 ## Examples
+
+### PRP Compliance Analysis
+```bash
+/sc:analyze --prp-compliance
+# Checks all PRP requirements
+# Identifies gaps in implementation
+# Suggests missing features
 ```
-/sc:analyze src/ --type architecture --depth deep
-/sc:analyze api/auth.js --type security --recommendations
-/sc:analyze . --type performance --metrics
+
+### Codebase Analysis
+```bash
+/sc:analyze "src/"
+# Analyzes code structure
+# Validates against PRP architecture
+# Identifies improvement areas
 ```
+
+### Performance Analysis
+```bash
+/sc:analyze --focus performance
+# Measures against PRP targets
+# Identifies bottlenecks
+# Suggests optimizations
+```
+
+## Analysis Types
+
+- **quality** - Code quality metrics
+- **security** - Security vulnerabilities
+- **performance** - Performance bottlenecks
+- **architecture** - System design issues
+- **prp-compliance** - PRP requirement coverage
+
+## Flags
+
+- `--focus [type]` - Specific analysis focus
+- `--depth [level]` - Analysis depth (quick/standard/deep)
+- `--compare-prp` - Compare against PRP specs
+- `--suggest-tests` - Suggest FloSho test scenarios
+
+## Output
+
+Analysis reports include:
+1. Executive summary
+2. PRP compliance status
+3. Detailed findings
+4. Recommendations
+5. FloSho test suggestions
+
+## Related Commands
+
+- `/sc:troubleshoot` - Debug specific issues
+- `/sc:improve` - Act on analysis findings
+- `/xt:validate` - Validate PRP compliance
+- `/fs:flow` - Test identified scenarios
