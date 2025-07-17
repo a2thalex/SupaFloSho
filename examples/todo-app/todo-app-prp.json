@@ -1,0 +1,218 @@
+{
+  "version": "1.0",
+  "framework": "SupaFloSho",
+  "project": {
+    "name": "Collaborative Todo App",
+    "description": "A real-time collaborative todo application with categories and team sharing",
+    "type": "web-application",
+    "created": "2024-01-15T10:00:00Z"
+  },
+  "overview": {
+    "vision": "Create a modern todo application that helps teams collaborate in real-time with organized task management",
+    "goals": [
+      "Real-time synchronization across team members",
+      "Intuitive categorization system",
+      "Seamless collaboration features",
+      "Mobile-responsive design"
+    ],
+    "constraints": [
+      "Must work offline with sync when online",
+      "Support up to 50 team members per workspace",
+      "Free tier with premium features"
+    ]
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "persona": "Team Member",
+      "story": "As a team member, I want to create and manage todos so that I can track my tasks",
+      "acceptanceCriteria": [
+        "Can create todos with title and description",
+        "Can mark todos as complete/incomplete",
+        "Can edit and delete my todos",
+        "Changes sync in real-time"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "US-002",
+      "persona": "Team Member",
+      "story": "As a team member, I want to categorize todos so that I can organize my work",
+      "acceptanceCriteria": [
+        "Can create custom categories",
+        "Can assign todos to categories",
+        "Can filter by category",
+        "Can see category colors"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "US-003",
+      "persona": "Team Lead",
+      "story": "As a team lead, I want to share todos with team members so that we can collaborate",
+      "acceptanceCriteria": [
+        "Can invite team members via email",
+        "Can assign todos to team members",
+        "Can see who's working on what",
+        "Real-time updates for all members"
+      ],
+      "priority": "high"
+    }
+  ],
+  "technicalSpecifications": {
+    "stack": {
+      "frontend": "React 18 with TypeScript",
+      "backend": "Node.js with Express",
+      "database": "PostgreSQL",
+      "realtime": "Socket.io",
+      "infrastructure": "Docker + AWS"
+    },
+    "architecture": {
+      "pattern": "REST API with WebSocket overlay",
+      "components": [
+        {
+          "name": "React SPA",
+          "responsibilities": ["UI rendering", "State management with Redux", "WebSocket client"]
+        },
+        {
+          "name": "API Server",
+          "responsibilities": ["CRUD operations", "Authentication", "Team management"]
+        },
+        {
+          "name": "WebSocket Server",
+          "responsibilities": ["Real-time sync", "Presence tracking", "Live updates"]
+        }
+      ]
+    }
+  },
+  "features": [
+    {
+      "id": "F-001",
+      "name": "Todo Management",
+      "description": "Core CRUD operations for todos",
+      "userStories": ["US-001"],
+      "components": ["TodoList", "TodoItem", "TodoForm", "TodoAPI"]
+    },
+    {
+      "id": "F-002",
+      "name": "Categories",
+      "description": "Categorization system for todos",
+      "userStories": ["US-002"],
+      "components": ["CategoryManager", "CategoryFilter", "CategoryAPI"]
+    },
+    {
+      "id": "F-003",
+      "name": "Team Collaboration",
+      "description": "Real-time collaboration features",
+      "userStories": ["US-003"],
+      "components": ["TeamInvite", "MemberList", "PresenceIndicator", "TeamAPI"]
+    }
+  ],
+  "apiSpecifications": [
+    {
+      "endpoint": "/api/todos",
+      "method": "GET",
+      "description": "Get all todos for the current user/team",
+      "authentication": true,
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "title": { "type": "string" },
+            "completed": { "type": "boolean" },
+            "category": { "type": "string" },
+            "assignee": { "type": "string" }
+          }
+        }
+      }
+    },
+    {
+      "endpoint": "/api/todos",
+      "method": "POST",
+      "description": "Create a new todo",
+      "authentication": true,
+      "requestSchema": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "required": true },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "assignee": { "type": "string" }
+        }
+      }
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": "TS-001",
+      "name": "Complete Todo Workflow",
+      "description": "Test creating, categorizing, sharing, and completing a todo",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "/",
+          "description": "Open todo app",
+          "expected": "Login page or dashboard"
+        },
+        {
+          "action": "click",
+          "selector": "#new-todo-button",
+          "description": "Click new todo button",
+          "expected": "Todo form opens"
+        },
+        {
+          "action": "fill",
+          "selector": "#todo-title",
+          "value": "Complete project proposal",
+          "description": "Enter todo title"
+        },
+        {
+          "action": "select",
+          "selector": "#category-select",
+          "value": "Work",
+          "description": "Select category"
+        },
+        {
+          "action": "click",
+          "selector": "#save-todo",
+          "description": "Save todo",
+          "expected": "Todo appears in list"
+        },
+        {
+          "action": "screenshot",
+          "name": "todo-created",
+          "description": "Todo added to list"
+        },
+        {
+          "action": "click",
+          "selector": ".share-button",
+          "description": "Share with team",
+          "expected": "Share dialog opens"
+        },
+        {
+          "action": "screenshot",
+          "name": "team-sharing",
+          "description": "Team sharing interface"
+        }
+      ]
+    }
+  ],
+  "uiSpecifications": {
+    "designSystem": "Material-UI",
+    "colorScheme": {
+      "primary": "#1976d2",
+      "secondary": "#dc004e",
+      "success": "#4caf50"
+    },
+    "components": [
+      {
+        "name": "TodoItem",
+        "props": ["title", "completed", "category", "assignee"],
+        "interactions": ["click to toggle", "swipe to delete", "long press to edit"]
+      }
+    ]
+  }
+}
