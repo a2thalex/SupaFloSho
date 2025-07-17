@@ -1,0 +1,180 @@
+{
+  "version": "1.0",
+  "framework": "SupaFloSho",
+  "project": {
+    "name": "{{PROJECT_NAME}}",
+    "description": "Modern web application with real-time features",
+    "type": "web-application",
+    "created": "{{TIMESTAMP}}"
+  },
+  "overview": {
+    "vision": "Create a responsive, scalable web application that provides excellent user experience across all devices",
+    "goals": [
+      "Fast initial load time (<3s)",
+      "Real-time data synchronization",
+      "Mobile-first responsive design",
+      "Accessibility WCAG 2.1 AA compliant"
+    ],
+    "constraints": [
+      "Must work on modern browsers (last 2 versions)",
+      "Initial MVP in 6-8 weeks",
+      "Budget constraints for infrastructure"
+    ],
+    "assumptions": [
+      "Users have stable internet connection",
+      "Primary usage on desktop and mobile devices"
+    ]
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "persona": "End User",
+      "story": "As an end user, I want to access the application from any device so that I can use it anywhere",
+      "acceptanceCriteria": [
+        "Application loads on mobile, tablet, and desktop",
+        "UI adapts to different screen sizes",
+        "Core functionality available on all devices"
+      ],
+      "priority": "high"
+    },
+    {
+      "id": "US-002",
+      "persona": "End User",
+      "story": "As an end user, I want to see real-time updates so that I always have current information",
+      "acceptanceCriteria": [
+        "Data updates without page refresh",
+        "Updates appear within 2 seconds",
+        "Visual indicators for new data"
+      ],
+      "priority": "high"
+    }
+  ],
+  "technicalSpecifications": {
+    "stack": {
+      "frontend": "React 18 with TypeScript",
+      "backend": "Node.js with Express",
+      "database": "PostgreSQL with Redis cache",
+      "infrastructure": "Docker containers on AWS"
+    },
+    "architecture": {
+      "pattern": "Microservices with API Gateway",
+      "components": [
+        {
+          "name": "Web Client",
+          "technology": "React SPA",
+          "responsibilities": ["UI rendering", "State management", "API communication"]
+        },
+        {
+          "name": "API Gateway",
+          "technology": "Express + JWT",
+          "responsibilities": ["Authentication", "Request routing", "Rate limiting"]
+        },
+        {
+          "name": "WebSocket Server",
+          "technology": "Socket.io",
+          "responsibilities": ["Real-time updates", "Connection management"]
+        }
+      ]
+    },
+    "integrations": [
+      {
+        "service": "Authentication",
+        "provider": "Auth0",
+        "purpose": "User authentication and authorization"
+      },
+      {
+        "service": "File Storage",
+        "provider": "AWS S3",
+        "purpose": "User uploads and static assets"
+      }
+    ],
+    "performance": {
+      "targetUsers": "10,000 concurrent",
+      "responseTime": "<200ms API, <3s page load",
+      "availability": "99.9% uptime"
+    }
+  },
+  "features": [
+    {
+      "id": "F-001",
+      "name": "User Authentication",
+      "description": "Secure user registration, login, and session management",
+      "userStories": ["US-001"],
+      "components": ["Login Form", "Registration Form", "Password Reset"],
+      "scenarios": [
+        {
+          "name": "Successful Login",
+          "steps": [
+            "User enters credentials",
+            "System validates",
+            "User redirected to dashboard"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F-002",
+      "name": "Real-time Dashboard",
+      "description": "Live updating dashboard with key metrics and notifications",
+      "userStories": ["US-002"],
+      "components": ["Metric Cards", "Activity Feed", "Notification Center"],
+      "scenarios": [
+        {
+          "name": "Live Data Update",
+          "steps": [
+            "User views dashboard",
+            "New data arrives",
+            "Dashboard updates automatically"
+          ]
+        }
+      ]
+    }
+  ],
+  "testScenarios": [
+    {
+      "id": "TS-001",
+      "name": "Complete User Journey",
+      "description": "Test full user flow from registration to using core features",
+      "feature": "F-001",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "/",
+          "description": "Open application",
+          "expected": "Landing page loads"
+        },
+        {
+          "action": "click",
+          "selector": "#signup-button",
+          "description": "Click sign up",
+          "expected": "Registration form appears"
+        },
+        {
+          "action": "fill",
+          "selector": "#email",
+          "value": "test@example.com",
+          "description": "Enter email",
+          "expected": "Email field populated"
+        },
+        {
+          "action": "screenshot",
+          "name": "registration-form",
+          "description": "Capture registration state"
+        }
+      ],
+      "testData": {
+        "validUser": {
+          "email": "test@example.com",
+          "password": "SecurePass123!"
+        }
+      }
+    }
+  ],
+  "documentation": {
+    "userGuide": true,
+    "apiDocs": true,
+    "developerGuide": true,
+    "deploymentGuide": true
+  }
+}

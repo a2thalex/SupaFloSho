@@ -1,0 +1,124 @@
+{
+  "version": "1.0",
+  "framework": "SupaFloSho",
+  "project": {
+    "name": "{{PROJECT_NAME}}",
+    "description": "{{PROJECT_DESCRIPTION}}",
+    "type": "{{PROJECT_TYPE}}",
+    "created": "{{TIMESTAMP}}"
+  },
+  "overview": {
+    "vision": "{{PROJECT_VISION}}",
+    "goals": [],
+    "constraints": [],
+    "assumptions": []
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "persona": "{{USER_TYPE}}",
+      "story": "As a {{USER_TYPE}}, I want to {{ACTION}} so that {{BENEFIT}}",
+      "acceptanceCriteria": [],
+      "priority": "high"
+    }
+  ],
+  "technicalSpecifications": {
+    "stack": {
+      "frontend": "{{FRONTEND_TECH}}",
+      "backend": "{{BACKEND_TECH}}",
+      "database": "{{DATABASE}}",
+      "infrastructure": "{{INFRASTRUCTURE}}"
+    },
+    "architecture": {
+      "pattern": "{{ARCHITECTURE_PATTERN}}",
+      "components": []
+    },
+    "integrations": [],
+    "performance": {
+      "targetUsers": "{{TARGET_USERS}}",
+      "responseTime": "{{RESPONSE_TIME}}",
+      "availability": "{{AVAILABILITY}}"
+    }
+  },
+  "features": [
+    {
+      "id": "F-001",
+      "name": "{{FEATURE_NAME}}",
+      "description": "{{FEATURE_DESCRIPTION}}",
+      "userStories": ["US-001"],
+      "components": [],
+      "scenarios": []
+    }
+  ],
+  "apiSpecifications": [
+    {
+      "endpoint": "/api/{{RESOURCE}}",
+      "method": "GET",
+      "description": "{{API_DESCRIPTION}}",
+      "authentication": true,
+      "requestSchema": {},
+      "responseSchema": {},
+      "exampleRequest": {},
+      "exampleResponse": {},
+      "errorCodes": []
+    }
+  ],
+  "uiSpecifications": {
+    "designSystem": "{{DESIGN_SYSTEM}}",
+    "colorScheme": "{{COLOR_SCHEME}}",
+    "typography": "{{TYPOGRAPHY}}",
+    "layouts": [],
+    "components": [],
+    "interactions": []
+  },
+  "testScenarios": [
+    {
+      "id": "TS-001",
+      "name": "{{TEST_SCENARIO_NAME}}",
+      "description": "{{TEST_DESCRIPTION}}",
+      "feature": "F-001",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "navigate",
+          "target": "/",
+          "description": "Open application",
+          "expected": "Homepage loads successfully"
+        }
+      ],
+      "testData": {}
+    }
+  ],
+  "successCriteria": {
+    "functional": [],
+    "performance": [],
+    "usability": [],
+    "security": []
+  },
+  "implementation": {
+    "phases": [
+      {
+        "phase": 1,
+        "name": "MVP",
+        "duration": "{{PHASE_DURATION}}",
+        "features": [],
+        "deliverables": []
+      }
+    ],
+    "milestones": [],
+    "risks": []
+  },
+  "documentation": {
+    "userGuide": true,
+    "apiDocs": true,
+    "developerGuide": true,
+    "deploymentGuide": true
+  },
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "{{TIMESTAMP}}",
+    "author": "{{AUTHOR}}",
+    "reviewers": [],
+    "approvals": []
+  }
+}
