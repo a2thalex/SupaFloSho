@@ -2,15 +2,37 @@
   "name": "supaflosho",
   "version": "1.0.0",
   "description": "Unified AI-driven development framework combining xText-PRP, SuperClaude, and FloSho",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "install:complete": "python setup/install.py --profile complete",
-    "install:minimal": "python setup/install.py --profile minimal",
-    "install:dev": "python setup/install.py --profile developer",
-    "install:interactive": "python setup/install.py --interactive",
-    "test:flosho": "node testing/run-tests.js",
-    "docs:generate": "node testing/generate-docs.js",
-    "setup:mcp": "node setup/install-mcp.js"
+    "install:complete": "python setup/install.py install --profile complete",
+    "install:minimal": "python setup/install.py install --profile minimal",
+    "install:dev": "python setup/install.py install --profile developer",
+    "install:interactive": "python setup/install.py install --interactive",
+    "uninstall": "python setup/install.py uninstall",
+    "test:flosho": "cd testing && npm test",
+    "test:example": "node testing/examples/todo-app-test.js",
+    "docs:generate": "node scripts/generate-unified-docs.js",
+    "prp:init": "node scripts/prp-generator.js",
+    "dev": "npm run install:dev && code ."
+  },
+  "workspaces": [
+    "testing",
+    "mcp/*"
+  ],
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "inquirer": "^9.2.0",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a2thalex/SupaFloSho.git"
   },
   "keywords": [
     "ai",
@@ -18,22 +40,19 @@
     "development",
     "testing",
     "documentation",
-    "context-engineering",
     "prp",
+    "context-engineering",
+    "superclaude",
     "flosho"
   ],
-  "author": "Gregory Reeves (Inkwell Technology Studios) & SupaFloSho Contributors",
+  "author": "SupaFloSho Contributors",
   "license": "MIT",
-  "dependencies": {
-    "playwright": "^1.40.0",
-    "marked": "^4.0.0",
-    "jimp": "^0.22.0",
-    "chalk": "^5.3.0",
-    "inquirer": "^9.2.12",
-    "fs-extra": "^11.2.0"
+  "bugs": {
+    "url": "https://github.com/a2thalex/SupaFloSho/issues"
   },
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0"
+  "homepage": "https://github.com/a2thalex/SupaFloSho#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 }

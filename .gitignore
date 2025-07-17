@@ -1,58 +1,82 @@
-# Dependencies
+# Node
 node_modules/
-*.lock
-package-lock.json
-yarn.lock
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
 
 # Testing
-coverage/
-.nyc_output/
-*.log
-
-# FloSho outputs
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
 testing/flosho-docs/
-testing/screenshots/
-testing/flows/
-
-# Environment
-.env
-.env.local
-.env.*.local
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 .DS_Store
 
-# Build outputs
-dist/
-build/
-*.pyc
-__pycache__/
-
-# Temporary files
-*.tmp
-*.temp
-.cache/
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# Python
-*.egg-info/
-.pytest_cache/
+# Environment
+.env
+.env.local
+.env.*.local
 venv/
+ENV/
 env/
 
-# Documentation builds
-docs/_build/
-site/
+# Build outputs
+/dist
+/build
+*.tsbuildinfo
 
-# MCP server configs
-mcp/config.local.json
+# Logs
+logs/
+*.log
 
-# User-specific settings
-.claude/settings.local.json
+# OS
+.DS_Store
+Thumbs.db
+
+# SupaFloSho specific
+supaflosho-backup/
+.claude-backup/
+mcp-servers/
+test-outputs/
+*.prp.json
+*.prp.backup
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
