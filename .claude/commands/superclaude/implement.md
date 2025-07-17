@@ -1,7 +1,12 @@
+---
+allowed-tools: [Read, Write, Edit, MultiEdit, Bash, Glob, TodoWrite, Task]
+description: "Feature and code implementation with intelligent persona activation and MCP integration"
+---
+
 # /sc:implement - Feature Implementation
 
 ## Purpose
-Implement features, components, and code functionality with PRP-aware intelligent expert activation.
+Implement features, components, and code functionality with intelligent expert activation and comprehensive development support.
 
 ## Usage
 ```
@@ -17,28 +22,28 @@ Implement features, components, and code functionality with PRP-aware intelligen
 - `--with-tests` - Include test implementation
 - `--documentation` - Generate documentation alongside implementation
 
-## PRP Integration
-This command automatically:
-1. References the current PRP for requirements
-2. Ensures implementation aligns with defined specifications
-3. Uses PRP-defined technology stack
-4. Follows PRP architectural patterns
+## Execution
+1. Analyze implementation requirements and detect technology context
+2. Auto-activate relevant personas (frontend, backend, security, etc.)
+3. Coordinate with MCP servers (Magic for UI, Context7 for patterns, Sequential for complex logic)
+4. Generate implementation code with best practices
+5. Apply security and quality validation
+6. Provide testing recommendations and next steps
 
-## Execution Flow
-1. Read relevant PRP sections for the feature
-2. Analyze implementation requirements
-3. Auto-activate relevant personas (frontend, backend, security, etc.)
-4. Coordinate with MCP servers when needed
-5. Generate implementation code following PRP guidelines
-6. Apply security and quality validation
-7. Create FloSho test scenarios from PRP
+## Claude Code Integration
+- Uses Write/Edit/MultiEdit for code generation and modification
+- Leverages Read and Glob for codebase analysis and context understanding
+- Applies TodoWrite for implementation progress tracking
+- Integrates Task tool for complex multi-step implementations
+- Coordinates with MCP servers for specialized functionality
+- Auto-activates appropriate personas based on implementation type
 
 ## Auto-Activation Patterns
-- **Frontend**: UI components matching PRP UI/UX specs
-- **Backend**: APIs following PRP endpoint definitions
-- **Security**: Authentication per PRP security requirements
-- **Architecture**: System design from PRP architecture
-- **Performance**: Optimization for PRP performance criteria
+- **Frontend**: UI components, React/Vue/Angular development
+- **Backend**: APIs, services, database integration
+- **Security**: Authentication, authorization, data protection
+- **Architecture**: System design, module structure
+- **Performance**: Optimization, scalability considerations
 
 ## Examples
 ```
@@ -47,6 +52,3 @@ This command automatically:
 /sc:implement REST API for user management --type api --safe
 /sc:implement payment processing service --type service --iterative
 ```
-
-## Integration with FloSho
-After implementation, automatically generates FloSho test flows based on PRP test scenarios for the implemented feature.

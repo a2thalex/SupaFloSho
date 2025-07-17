@@ -1,38 +1,36 @@
-# /sc:analyze - Code & System Analysis
+---
+allowed-tools: [Read, Glob, Task, BrowsingWeb]
+description: "Deep code, architecture, and project analysis with intelligent recommendations"
+---
+
+# /sc:analyze - Deep Analysis
 
 ## Purpose
-Analyze code, performance, security, and system behavior with PRP-aware insights.
+Perform comprehensive analysis of code, architecture, performance, security, and project structure with actionable insights.
 
 ## Usage
 ```
-/sc:analyze [target] [--type code|performance|security|architecture] [--depth shallow|deep]
+/sc:analyze [target] [--type code|architecture|performance|security|all] [--depth shallow|medium|deep]
 ```
 
-## Analysis Types
-- **Code Quality**: Style, complexity, maintainability
-- **Performance**: Bottlenecks, optimization opportunities
-- **Security**: Vulnerabilities, best practices
-- **Architecture**: Design patterns, coupling, cohesion
-- **PRP Compliance**: Alignment with requirements
+## Arguments
+- `target` - File, directory, or concept to analyze
+- `--type` - Analysis type (code, architecture, performance, security, all)
+- `--depth` - Analysis depth level
+- `--metrics` - Include quantitative metrics
+- `--recommendations` - Provide improvement suggestions
+- `--compare` - Compare with best practices
 
-## What It Does
-1. Examines specified code or system aspect
-2. Compares against PRP requirements
-3. Identifies issues and improvements
-4. Provides actionable recommendations
-5. Generates analysis reports
+## Execution
+1. Scan target for analysis scope
+2. Apply specialized analysis based on type
+3. Generate insights and findings
+4. Provide actionable recommendations
+5. Create visual analysis reports if applicable
 
 ## Examples
 ```
-/sc:analyze user-service --type performance
-/sc:analyze authentication --type security --depth deep
-/sc:analyze frontend --type code
-/sc:analyze --type prp-compliance
+/sc:analyze src/ --type architecture --depth deep
+/sc:analyze api/auth.js --type security --recommendations
+/sc:analyze . --type performance --metrics
 ```
-
-## Output
-- Detailed analysis report
-- Issue severity rankings
-- Improvement recommendations
-- PRP compliance score
-- Suggested FloSho test scenarios for found issues

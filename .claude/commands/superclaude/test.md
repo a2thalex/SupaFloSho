@@ -1,43 +1,36 @@
-# /sc:test - Test Generation & Strategy
+---
+allowed-tools: [Read, Write, Edit, MultiEdit, Bash]
+description: "Generate comprehensive test suites and testing strategies"
+---
+
+# /sc:test - Test Generation
 
 ## Purpose
-Generate comprehensive tests based on PRP test scenarios and implementation details.
+Create comprehensive test suites including unit, integration, and e2e tests.
 
 ## Usage
 ```
-/sc:test [component/feature] [--type unit|integration|e2e] [--framework jest|mocha|playwright]
+/sc:test [target] [--type unit|integration|e2e|all] [--framework jest|mocha|playwright]
 ```
 
-## What It Does
-1. Reads test scenarios from PRP
-2. Analyzes implementation for test points
-3. Generates appropriate test suites
-4. Creates test data and fixtures
-5. Integrates with FloSho for visual testing
+## Arguments
+- `target` - Code or feature to test
+- `--type` - Test type to generate
+- `--framework` - Testing framework
+- `--coverage` - Target coverage percentage
+- `--mocks` - Include mock data
+- `--ci` - CI/CD integration
 
-## Test Types
-- **Unit Tests**: Component and function level
-- **Integration Tests**: API and service interaction
-- **E2E Tests**: Full user flows from PRP
-- **Performance Tests**: Load and stress testing
-- **Security Tests**: Vulnerability testing
+## Execution
+1. Analyze code structure
+2. Identify test scenarios
+3. Generate test files
+4. Create mock data and fixtures
+5. Setup test configuration
 
 ## Examples
 ```
-/sc:test user-authentication --type integration
-/sc:test checkout-flow --type e2e --framework playwright
-/sc:test api-endpoints --type unit --framework jest
+/sc:test src/auth --type unit --framework jest
+/sc:test api/ --type integration --coverage 80
+/sc:test app --type e2e --framework playwright
 ```
-
-## FloSho Integration
-Automatically creates FloSho visual test flows for:
-- UI component testing
-- User journey validation
-- API response documentation
-
-## PRP Alignment
-Ensures test coverage for:
-- All PRP-defined user stories
-- Success criteria validation
-- Edge cases from PRP
-- Performance requirements
