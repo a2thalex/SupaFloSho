@@ -1,12 +1,11 @@
-/**
- * PRP Integration for FloSho
- * Connects FloSho testing with xText-PRP requirements
- */
-
 import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 
+/**
+ * PRP Integration for SupaFloSho
+ * Connects FloSho testing with xText-PRP requirements
+ */
 export class PRPIntegration {
   constructor(flosho) {
     this.flosho = flosho;
@@ -20,126 +19,149 @@ export class PRPIntegration {
       const prpContent = await fs.readFile(prpPath, 'utf-8');
       this.prp = JSON.parse(prpContent);
       this.hasPRP = true;
-      console.log(chalk.green('✅ PRP loaded successfully'));
+      console.log(chalk.green(`✅ PRP loaded from: ${prpPath}`));
     } catch (error) {
-      // PRP is optional, so no error if not found
-      this.hasPRP = false;
+      // PRP is optional, so we don't throw
+      console.log(chalk.gray('No PRP found - testing without requirements'));
     }
   }
 
-  async getFlowSteps(flowName) {
+  getTestScenario(name) {
     if (!this.hasPRP || !this.prp.testScenarios) return null;
     
-    // Find matching test scenario in PRP
-    const scenario = this.prp.testScenarios.find(
-      s => s.name === flowName || s.id === flowName
+    return this.prp.testScenarios.find(scenario => 
+      scenario.name === name || scenario.id === name
     );
-    
-    if (!scenario) return null;
-    
-    // Convert PRP scenario to FloSho steps
-    return scenario.steps.map(step => ({
-      action: step.action,
-      selector: step.selector || step.element,
-      value: step.value || step.data,
-      description: step.description,
-      expected: step.expected
-    }));
   }
 
-  async getAPITests(endpoint) {
-    if (!this.hasPRP || !this.prp.apiSpecifications) return null;
+  getAPITests(endpoint) {
+    if (!this.hasPRP || !this.prp.apiTests) return [];
     
-    // Find matching API spec in PRP
-    const apiSpec = this.prp.apiSpecifications.find(
-      spec => spec.endpoint === endpoint || spec.path === endpoint
+    return this.prp.apiTests.filter(test => 
+      test.endpoint === endpoint || endpoint.includes(test.endpoint)
     );
-    
-    if (!apiSpec) return null;
-    
-    // Convert PRP API spec to FloSho tests
-    return apiSpec.tests || [
-      {
-        name: `Test ${apiSpec.method} ${endpoint}`,
-        method: apiSpec.method,
-        data: apiSpec.exampleRequest,
-        expect: {
-          status: apiSpec.expectedStatus || 200,
-          schema: apiSpec.responseSchema
-        }
-      }
-    ];
   }
 
-  async getFeatureScenarios(featureName) {
+  getFeature(featureName) {
     if (!this.hasPRP || !this.prp.features) return null;
     
-    // Find feature in PRP
-    const feature = this.prp.features.find(
-      f => f.name === featureName || f.id === featureName
+    return this.prp.features.find(feature => 
+      feature.name === featureName || feature.id === featureName
     );
-    
-    if (!feature || !feature.scenarios) return null;
-    
-    return feature.scenarios;
   }
 
-  async validateCoverage(flows, apiTests) {
-    if (!this.hasPRP) {
-      return { coverage: 100, missing: [], status: 'no-prp' };
+  getUserStories() {
+    if (!this.hasPRP || !this.prp.userStories) return [];
+    return this.prp.userStories;
+  }
+
+  getAcceptanceCriteria(storyId) {
+    const story = this.getUserStories().find(s => s.id === storyId);
+    return story?.acceptanceCriteria || [];
+  }
+
+  mergeWithPRPScenario(userSteps, prpScenario) {
+    // Merge user-provided steps with PRP scenario
+    // PRP provides the structure, user can override specifics
+    const merged = [];
+    
+    prpScenario.steps.forEach((prpStep, index) => {
+      const userStep = userSteps[index];
+      if (userStep) {
+        // User step takes precedence but inherits PRP metadata
+        merged.push({
+          ...prpStep,
+          ...userStep,
+          prpValidation: prpStep.validation
+        });
+      } else {
+        // Use PRP step as-is
+        merged.push(prpStep);
+      }
+    });
+    
+    // Add any extra user steps
+    if (userSteps.length > prpScenario.steps.length) {
+      merged.push(...userSteps.slice(prpScenario.steps.length));
     }
     
+    return merged;
+  }
+
+  async validateImplementation(executedFlows) {
+    if (!this.hasPRP || !this.prp.testScenarios) {
+      return { covered: [], missing: [], coverage: 100 };
+    }
+    
+    const requiredScenarios = this.prp.testScenarios.map(s => s.name);
+    const executedScenarios = executedFlows.map(f => f.name);
+    
+    const covered = requiredScenarios.filter(scenario => 
+      executedScenarios.includes(scenario)
+    );
+    
+    const missing = requiredScenarios.filter(scenario => 
+      !executedScenarios.includes(scenario)
+    );
+    
+    const coverage = Math.round((covered.length / requiredScenarios.length) * 100);
+    
+    return { covered, missing, coverage };
+  }
+
+  generateTestsFromUserStory(story) {
+    const tests = [];
+    
+    // Generate a main flow test
+    tests.push({
+      name: `User Story: ${story.title}`,
+      steps: story.acceptanceCriteria.map(criteria => ({
+        action: 'validate',
+        description: criteria,
+        validation: true
+      }))
+    });
+    
+    // Generate edge case tests if defined
+    if (story.edgeCases) {
+      story.edgeCases.forEach(edgeCase => {
+        tests.push({
+          name: `Edge Case: ${edgeCase.name}`,
+          steps: edgeCase.steps
+        });
+      });
+    }
+    
+    return tests;
+  }
+
+  async exportPRPValidationReport(outputPath) {
     const report = {
-      coverage: 0,
-      missing: [],
-      covered: [],
-      total: 0
+      project: this.flosho.projectName,
+      prpVersion: this.prp?.version || 'unknown',
+      timestamp: new Date().toISOString(),
+      userStories: this.getUserStories().map(story => ({
+        id: story.id,
+        title: story.title,
+        tested: this.flosho.recorder.flows.some(flow => 
+          flow.name.includes(story.title) || flow.metadata?.storyId === story.id
+        )
+      })),
+      testScenarios: this.prp?.testScenarios?.map(scenario => ({
+        id: scenario.id,
+        name: scenario.name,
+        executed: this.flosho.recorder.flows.some(flow => flow.name === scenario.name)
+      })) || [],
+      overallCoverage: 0 // Will be calculated
     };
     
-    // Check test scenario coverage
-    if (this.prp.testScenarios) {
-      report.total += this.prp.testScenarios.length;
-      
-      this.prp.testScenarios.forEach(scenario => {
-        const covered = flows.some(flow => 
-          flow.name === scenario.name || flow.name === scenario.id
-        );
-        
-        if (covered) {
-          report.covered.push(scenario.name);
-        } else {
-          report.missing.push(`Test Scenario: ${scenario.name}`);
-        }
-      });
-    }
+    // Calculate overall coverage
+    const totalItems = report.userStories.length + report.testScenarios.length;
+    const testedItems = report.userStories.filter(s => s.tested).length + 
+                       report.testScenarios.filter(s => s.executed).length;
+    report.overallCoverage = totalItems > 0 ? Math.round((testedItems / totalItems) * 100) : 0;
     
-    // Check API coverage
-    if (this.prp.apiSpecifications) {
-      report.total += this.prp.apiSpecifications.length;
-      
-      this.prp.apiSpecifications.forEach(apiSpec => {
-        const covered = apiTests.some(test => 
-          test.endpoint === apiSpec.endpoint || test.endpoint === apiSpec.path
-        );
-        
-        if (covered) {
-          report.covered.push(`API: ${apiSpec.endpoint}`);
-        } else {
-          report.missing.push(`API Test: ${apiSpec.method} ${apiSpec.endpoint}`);
-        }
-      });
-    }
-    
-    // Calculate coverage percentage
-    report.coverage = report.total > 0 
-      ? Math.round((report.covered.length / report.total) * 100)
-      : 100;
-    
-    // Save report
-    await fs.writeFile(
-      path.join(this.flosho.options.outputDir, 'prp-compliance.json'),
-      JSON.stringify(report, null, 2)
-    );
+    await fs.writeFile(outputPath, JSON.stringify(report, null, 2));
     
     return report;
   }

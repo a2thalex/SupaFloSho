@@ -28,8 +28,7 @@ export class FloSho {
   }
 
   async init() {
-    console.log(chalk.blue.bold(`\n🌊 FloSho Testing - ${this.projectName}`));
-    console.log(chalk.gray('Part of SupaFloSho Framework\n'));
+    console.log(chalk.blue.bold(`\n🌊 SupaFloSho Testing - ${this.projectName}\n`));
     
     // Load PRP if available
     await this.prp.loadPRP();
@@ -54,46 +53,76 @@ export class FloSho {
     });
     
     this.page = await context.newPage();
-    console.log(chalk.green('✅ FloSho initialized - Ready to test!'));
+    console.log(chalk.green('✅ SupaFloSho initialized - Ready to test!'));
     
     if (this.prp.hasPRP) {
-      console.log(chalk.cyan('📋 PRP loaded - Test scenarios available'));
+      console.log(chalk.cyan('📄 PRP loaded - Test scenarios available'));
     }
   }
 
   async flow(flowName, steps) {
-    // If no steps provided, try to load from PRP
-    if (!steps && this.prp.hasPRP) {
-      steps = await this.prp.getFlowSteps(flowName);
-      if (steps) {
-        console.log(chalk.cyan(`📋 Using PRP test scenario: ${flowName}`));
-      }
+    // Check if flow exists in PRP
+    const prpFlow = this.prp.getTestScenario(flowName);
+    if (prpFlow) {
+      console.log(chalk.magenta(`🎯 Using PRP scenario: ${flowName}`));
+      steps = this.prp.mergeWithPRPScenario(steps, prpFlow);
     }
     
     return await this.recorder.recordFlow(flowName, steps);
   }
 
+  async flowFromPRP(scenarioId) {
+    const scenario = this.prp.getTestScenario(scenarioId);
+    if (!scenario) {
+      throw new Error(`PRP scenario '${scenarioId}' not found`);
+    }
+    
+    console.log(chalk.magenta(`🎯 Running PRP scenario: ${scenario.name}`));
+    return await this.recorder.recordFlow(scenario.name, scenario.steps);
+  }
+
   async api(endpoint, tests) {
-    // If no tests provided, try to load from PRP
-    if (!tests && this.prp.hasPRP) {
-      tests = await this.prp.getAPITests(endpoint);
-      if (tests) {
-        console.log(chalk.cyan(`📋 Using PRP API tests for: ${endpoint}`));
-      }
+    // Check if API tests exist in PRP
+    const prpTests = this.prp.getAPITests(endpoint);
+    if (prpTests) {
+      console.log(chalk.magenta(`🎯 Using PRP API tests for: ${endpoint}`));
+      tests = [...tests, ...prpTests];
     }
     
     return await this.apiViz.testAPI(endpoint, tests);
   }
 
   async auto(featureName) {
-    // Enhanced auto-test with PRP integration
-    const prpScenarios = await this.prp.getFeatureScenarios(featureName);
-    if (prpScenarios) {
-      console.log(chalk.cyan(`📋 Auto-testing ${prpScenarios.length} PRP scenarios`));
-      return await this.generator.autoTestWithPRP(featureName, prpScenarios);
+    // Generate tests from PRP if available
+    if (this.prp.hasPRP) {
+      const prpFeature = this.prp.getFeature(featureName);
+      if (prpFeature) {
+        console.log(chalk.magenta(`🎯 Auto-generating tests from PRP: ${featureName}`));
+        return await this.generator.autoTestFromPRP(prpFeature);
+      }
     }
     
     return await this.generator.autoTest(featureName);
+  }
+
+  async validatePRP() {
+    if (!this.prp.hasPRP) {
+      console.log(chalk.yellow('⚠️ No PRP found - skipping validation'));
+      return;
+    }
+    
+    console.log(chalk.blue('\n🔍 Validating against PRP...'));
+    const results = await this.prp.validateImplementation(this.recorder.flows);
+    
+    console.log(chalk.green(`✅ Covered: ${results.covered.length} scenarios`));
+    if (results.missing.length > 0) {
+      console.log(chalk.red(`❌ Missing: ${results.missing.length} scenarios`));
+      results.missing.forEach(scenario => {
+        console.log(chalk.red(`  - ${scenario}`));
+      });
+    }
+    
+    return results;
   }
 
   async setViewport(preset) {
@@ -109,58 +138,36 @@ export class FloSho {
     console.log(chalk.cyan(`📱 Viewport changed to: ${viewport.width}x${viewport.height}`));
   }
 
-  async validateAgainstPRP() {
-    if (!this.prp.hasPRP) {
-      console.log(chalk.yellow('⚠️  No PRP found for validation'));
-      return;
-    }
-    
-    console.log(chalk.blue('\n🔍 Validating test coverage against PRP...'));
-    const report = await this.prp.validateCoverage(
-      this.recorder.flows,
-      this.apiViz.apiTests
-    );
-    
-    console.log(chalk.green(`✅ Coverage: ${report.coverage}%`));
-    if (report.missing.length > 0) {
-      console.log(chalk.yellow('⚠️  Missing test scenarios:'));
-      report.missing.forEach(scenario => {
-        console.log(chalk.yellow(`   - ${scenario}`));
-      });
-    }
-    
-    return report;
-  }
-
   async done() {
     console.log(chalk.yellow('\n📝 Generating documentation...'));
     
-    // Generate standard documentation
+    // Validate PRP coverage
+    const prpValidation = await this.validatePRP();
+    
     await this.recorder.generateDocumentation();
     await this.apiViz.generateAPIDocs();
-    
-    // Generate PRP compliance report
-    const prpReport = await this.validateAgainstPRP();
     
     if (this.browser) {
       await this.browser.close();
     }
     
-    console.log(chalk.green.bold('\n✨ FloSho testing complete!'));
+    console.log(chalk.green.bold('\n✨ SupaFloSho testing complete!'));
     console.log(chalk.cyan(`📖 User Manual: ${this.options.outputDir}/user-manual/`));
     console.log(chalk.cyan(`📸 Screenshots: ${this.options.outputDir}/screenshots/`));
     console.log(chalk.cyan(`🎥 Videos: ${this.options.outputDir}/videos/`));
-    console.log(chalk.cyan(`📋 PRP Report: ${this.options.outputDir}/prp-compliance.json`));
+    
+    if (prpValidation) {
+      console.log(chalk.magenta(`🎯 PRP Coverage: ${prpValidation.coverage}%`));
+    }
     
     // Generate summary
     const summary = {
       project: this.projectName,
-      framework: 'SupaFloSho',
       timestamp: new Date().toISOString(),
       flows: this.recorder.flows.length,
       screenshots: this.recorder.screenshots.length,
       apiTests: this.apiViz.apiTests.length,
-      prpCompliance: prpReport,
+      prpCoverage: prpValidation?.coverage || 'N/A',
       status: 'complete'
     };
     
