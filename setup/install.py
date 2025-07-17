@@ -31,21 +31,22 @@ class SupaFloShoInstaller:
             },
             'complete': {
                 'name': 'Complete',
-                'components': ['core', 'commands', 'personas', 'testing', 'mcp', 'templates'],
-                'description': 'Everything including MCP servers and templates'
+                'components': ['core', 'commands', 'personas', 'testing', 'templates'],
+                'description': 'Everything except MCP servers'
             },
             'developer': {
                 'name': 'Developer',
-                'components': ['core', 'commands', 'personas', 'testing', 'mcp', 'templates', 'examples'],
-                'description': 'Full installation with examples and development tools'
+                'components': ['core', 'commands', 'personas', 'testing', 'templates', 'examples', 'mcp'],
+                'description': 'Full installation including MCP tools (optional)'
             }
         }
         
-        self.mcp_servers = {
-            'context7': '@context7/mcp',
-            'sequential': '@sequential/mcp',
-            'magic': '@magic/mcp',
-            'playwright': 'playwright'
+        # Correct MCP packages based on actual npm registry
+        self.mcp_packages = {
+            'sdk': '@modelcontextprotocol/sdk',
+            'filesystem': '@modelcontextprotocol/server-filesystem',
+            'inspector': '@modelcontextprotocol/inspector',
+            'framework': 'mcp-framework'
         }
 
     def print_banner(self):
@@ -135,11 +136,10 @@ class SupaFloShoInstaller:
         """Install persona system"""
         print("\n🎭 Installing personas...")
         
-        shutil.copy2(
-            self.repo_dir / 'core' / 'personas' / 'PERSONAS.md',
-            self.claude_dir / 'PERSONAS.md'
-        )
-        print("✅ Installed persona system")
+        personas_file = self.repo_dir / 'core' / 'personas' / 'PERSONAS.md'
+        if personas_file.exists():
+            shutil.copy2(personas_file, self.claude_dir / 'PERSONAS.md')
+            print("✅ Installed persona system")
 
     def install_testing(self):
         """Install FloSho testing framework"""
@@ -147,61 +147,90 @@ class SupaFloShoInstaller:
         
         # Install npm dependencies
         testing_dir = self.repo_dir / 'testing'
-        os.chdir(testing_dir)
-        
-        print("📦 Installing npm packages...")
-        subprocess.run(['npm', 'install'], check=True)
-        
-        # Install Playwright browsers
-        print("🌐 Installing Playwright browsers...")
-        subprocess.run(['npx', 'playwright', 'install', 'chromium'], check=True)
-        
-        print("✅ FloSho testing framework installed")
+        if testing_dir.exists():
+            os.chdir(testing_dir)
+            
+            print("📦 Installing npm packages...")
+            subprocess.run(['npm', 'install'], check=True)
+            
+            # Install Playwright browsers
+            print("🌐 Installing Playwright browsers...")
+            subprocess.run(['npx', 'playwright', 'install', 'chromium'], check=True)
+            
+            print("✅ FloSho testing framework installed")
 
     def install_mcp(self):
-        """Install MCP servers"""
-        print("\n🔧 Installing MCP servers...")
+        """Install MCP servers with correct packages"""
+        print("\n🔧 Optional: MCP Server Installation")
+        print("MCP (Model Context Protocol) enables advanced AI-to-tool connections.")
         
-        for name, package in self.mcp_servers.items():
-            print(f"📦 Installing {name}...")
+        response = input("\nInstall MCP development tools? [y/N]: ")
+        if response.lower() != 'y':
+            print("⏭️  Skipping MCP installation")
+            return
+        
+        print("\n📦 Installing MCP packages...")
+        
+        # Install MCP SDK for development
+        packages_to_install = []
+        
+        print("\nWhich MCP packages would you like to install?")
+        print("1. SDK - Core development kit (recommended)")
+        print("2. Filesystem Server - File access capabilities")
+        print("3. Inspector - Debugging tool")
+        print("4. Framework - Full MCP server framework")
+        print("5. All of the above")
+        
+        choice = input("\nEnter your choice (1-5): ")
+        
+        if choice == '1' or choice == '5':
+            packages_to_install.append(self.mcp_packages['sdk'])
+        if choice == '2' or choice == '5':
+            packages_to_install.append(self.mcp_packages['filesystem'])
+        if choice == '3' or choice == '5':
+            packages_to_install.append(self.mcp_packages['inspector'])
+        if choice == '4' or choice == '5':
+            packages_to_install.append(self.mcp_packages['framework'])
+        
+        for package in packages_to_install:
+            print(f"📦 Installing {package}...")
             try:
-                subprocess.run(['npm', 'install', '-g', package], check=True)
-                print(f"✅ Installed {name}")
-            except:
-                print(f"⚠️ Failed to install {name} - continuing...")
+                # Install locally in the project instead of globally
+                subprocess.run(['npm', 'install', package], 
+                             cwd=self.repo_dir,
+                             check=True)
+                print(f"✅ Installed {package}")
+            except subprocess.CalledProcessError:
+                print(f"⚠️  Failed to install {package}")
         
-        # Update Claude's MCP config
-        self.update_mcp_config()
+        if packages_to_install:
+            self.create_mcp_config()
 
-    def update_mcp_config(self):
-        """Update Claude's MCP configuration"""
-        mcp_config_path = self.claude_dir / 'mcp.json'
+    def create_mcp_config(self):
+        """Create MCP configuration for Claude"""
+        print("\n📝 Creating MCP configuration...")
         
-        config = {
+        mcp_config = {
             "servers": {
-                "context7": {
-                    "command": "context7-mcp",
-                    "args": []
-                },
-                "sequential": {
-                    "command": "sequential-mcp",
-                    "args": []
-                },
-                "magic": {
-                    "command": "magic-mcp",
-                    "args": []
-                },
-                "playwright": {
-                    "command": "playwright-mcp",
-                    "args": []
+                "filesystem": {
+                    "command": "npx",
+                    "args": [
+                        "-y",
+                        "@modelcontextprotocol/server-filesystem",
+                        str(self.home_dir / "Documents"),
+                        str(self.home_dir / "Desktop")
+                    ],
+                    "description": "Access to Documents and Desktop folders"
                 }
             }
         }
         
+        mcp_config_path = self.claude_dir / 'mcp-config.json'
         with open(mcp_config_path, 'w') as f:
-            json.dump(config, f, indent=2)
+            json.dump(mcp_config, f, indent=2)
         
-        print("✅ Updated MCP configuration")
+        print("✅ Created MCP configuration")
+        print("📌 Note: You can edit ~/.claude/mcp-config.json to add more MCP servers")
 
     def install_templates(self):
         """Install PRP templates"""
@@ -243,6 +272,10 @@ class SupaFloShoInstaller:
                 "smartPersonas": True,
                 "visualTesting": True,
                 "autoDocumentation": True
+            },
+            "mcp": {
+                "enabled": 'mcp' in self.profiles[profile]['components'],
+                "configPath": str(self.claude_dir / 'mcp-config.json')
             }
         }
         
@@ -297,6 +330,8 @@ class SupaFloShoInstaller:
             
         except Exception as e:
             print(f"\n❌ Installation failed: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     def interactive_setup(self):
@@ -332,9 +367,14 @@ SupaFloSho is ready to use! 🎉
 4. Test: /fs:flow "user journey"
 
 📚 Documentation:
-- User Guide: ~/.claude/examples/quick-start.md
+- Quick Start: ~/.claude/examples/quick-start.md
 - Commands: ~/.claude/COMMANDS.md
 - Personas: ~/.claude/PERSONAS.md
+
+💡 MCP Development (if installed):
+- Inspector: npx @modelcontextprotocol/inspector
+- Create server: npx mcp-framework create my-server
+- Docs: https://modelcontextprotocol.io
 
 🌊 Happy coding with SupaFloSho!
         """
@@ -358,7 +398,8 @@ SupaFloSho is ready to use! 🎉
             # Remove SupaFloSho files
             files_to_remove = [
                 'CLAUDE.md', 'COMMANDS.md', 'PERSONAS.md', 
-                'FLAGS.md', 'RULES.md', 'supaflosho.json'
+                'FLAGS.md', 'RULES.md', 'supaflosho.json',
+                'mcp-config.json'
             ]
             
             for file in files_to_remove:
