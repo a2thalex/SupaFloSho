@@ -1,0 +1,39 @@
+{
+  "name": "supaflosho",
+  "version": "1.0.0",
+  "description": "Unified AI-driven development framework combining xText-PRP, SuperClaude, and FloSho",
+  "main": "index.js",
+  "scripts": {
+    "install:complete": "python setup/install.py --profile complete",
+    "install:minimal": "python setup/install.py --profile minimal",
+    "install:dev": "python setup/install.py --profile developer",
+    "install:interactive": "python setup/install.py --interactive",
+    "test:flosho": "node testing/run-tests.js",
+    "docs:generate": "node testing/generate-docs.js",
+    "setup:mcp": "node setup/install-mcp.js"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "development",
+    "testing",
+    "documentation",
+    "context-engineering",
+    "prp",
+    "flosho"
+  ],
+  "author": "Gregory Reeves (Inkwell Technology Studios) & SupaFloSho Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "marked": "^4.0.0",
+    "jimp": "^0.22.0",
+    "chalk": "^5.3.0",
+    "inquirer": "^9.2.12",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  }
+}
