@@ -1,0 +1,238 @@
+{
+  "version": "1.0.0",
+  "projectName": "TodoMaster Pro",
+  "description": "A modern todo application with real-time sync and collaboration",
+  "created": "2024-01-15T10:00:00Z",
+  "framework": "SupaFloSho",
+  
+  "overview": {
+    "vision": "To create the most intuitive and collaborative todo management experience",
+    "goals": [
+      "Simple and clean user interface",
+      "Real-time collaboration features",
+      "Cross-device synchronization",
+      "Offline capability"
+    ],
+    "targetAudience": [
+      "Individual users for personal task management",
+      "Small teams for collaborative projects",
+      "Students for assignment tracking"
+    ],
+    "keyFeatures": [
+      "Create, edit, and delete todos",
+      "Organize with categories and tags",
+      "Real-time sync across devices",
+      "Share lists with collaborators",
+      "Due dates and reminders",
+      "Search and filter capabilities"
+    ]
+  },
+  
+  "userStories": [
+    {
+      "id": "US001",
+      "title": "As a user, I want to create a new todo",
+      "description": "Users should be able to quickly add new todos with minimal friction",
+      "acceptanceCriteria": [
+        "Given I am on the todo list, When I type in the input field and press Enter, Then a new todo is created",
+        "Given I create a todo, When I view the list, Then I see my new todo at the top",
+        "Given I create a todo, When the creation fails, Then I see an error message"
+      ],
+      "priority": "high",
+      "estimatedEffort": "small"
+    },
+    {
+      "id": "US002",
+      "title": "As a user, I want to mark todos as complete",
+      "description": "Users need to track their progress by marking items as done",
+      "acceptanceCriteria": [
+        "Given I have a todo, When I click the checkbox, Then it is marked as complete",
+        "Given a completed todo, When I click it again, Then it is marked as incomplete",
+        "Given I complete a todo, When I filter by active, Then it is hidden"
+      ],
+      "priority": "high",
+      "estimatedEffort": "small"
+    },
+    {
+      "id": "US003",
+      "title": "As a user, I want to organize todos with categories",
+      "description": "Users should be able to group related todos together",
+      "acceptanceCriteria": [
+        "Given I create a todo, When I assign a category, Then it appears in that category",
+        "Given I have categories, When I click one, Then I only see todos in that category",
+        "Given I have no todos in a category, When I view it, Then I see an empty state"
+      ],
+      "priority": "medium",
+      "estimatedEffort": "medium"
+    }
+  ],
+  
+  "technicalSpecifications": {
+    "architecture": {
+      "type": "monolithic",
+      "components": [
+        "Frontend SPA",
+        "REST API",
+        "PostgreSQL Database",
+        "WebSocket Server",
+        "Redis Cache"
+      ]
+    },
+    "stack": {
+      "frontend": {
+        "framework": "React",
+        "styling": "Tailwind CSS",
+        "stateManagement": "Zustand"
+      },
+      "backend": {
+        "runtime": "Node.js",
+        "framework": "Express",
+        "database": "PostgreSQL"
+      },
+      "infrastructure": {
+        "hosting": "Vercel + Railway",
+        "cicd": "GitHub Actions"
+      }
+    },
+    "integrations": [
+      "GitHub OAuth for authentication",
+      "SendGrid for email notifications",
+      "Pusher for real-time updates"
+    ],
+    "performanceTargets": {
+      "loadTime": "< 2s",
+      "apiResponse": "< 100ms",
+      "uptime": "99.9%"
+    }
+  },
+  
+  "testScenarios": [
+    {
+      "id": "TS001",
+      "name": "Complete Todo Workflow",
+      "description": "Test the full lifecycle of a todo item",
+      "steps": [
+        {
+          "action": "navigate",
+          "url": "/",
+          "description": "Open TodoMaster Pro"
+        },
+        {
+          "action": "screenshot",
+          "name": "empty-state",
+          "description": "Capture empty todo list"
+        },
+        {
+          "action": "fill",
+          "selector": "#new-todo",
+          "value": "Write SupaFloSho documentation",
+          "description": "Enter new todo"
+        },
+        {
+          "action": "press",
+          "key": "Enter",
+          "description": "Create todo"
+        },
+        {
+          "action": "wait",
+          "selector": ".todo-item",
+          "description": "Wait for todo to appear"
+        },
+        {
+          "action": "screenshot",
+          "name": "todo-created",
+          "description": "Todo added to list"
+        },
+        {
+          "action": "click",
+          "selector": ".todo-checkbox",
+          "description": "Mark todo as complete"
+        },
+        {
+          "action": "screenshot",
+          "name": "todo-completed",
+          "description": "Todo marked as done"
+        }
+      ],
+      "expectedOutcome": "Todo is created, displayed, and can be marked as complete"
+    },
+    {
+      "id": "TS002",
+      "name": "Category Management",
+      "description": "Test creating and using categories",
+      "steps": [
+        {
+          "action": "click",
+          "selector": "#add-category",
+          "description": "Open category creator"
+        },
+        {
+          "action": "fill",
+          "selector": "#category-name",
+          "value": "Work",
+          "description": "Enter category name"
+        },
+        {
+          "action": "click",
+          "selector": "#create-category",
+          "description": "Create category"
+        },
+        {
+          "action": "screenshot",
+          "name": "category-created",
+          "description": "New category appears"
+        }
+      ],
+      "expectedOutcome": "Categories can be created and todos can be organized within them"
+    }
+  ],
+  
+  "apiTests": [
+    {
+      "endpoint": "/api/todos",
+      "method": "GET",
+      "description": "Get all todos",
+      "expectedStatus": 200,
+      "expectedResponse": {
+        "success": true,
+        "data": []
+      }
+    },
+    {
+      "endpoint": "/api/todos",
+      "method": "POST",
+      "description": "Create a new todo",
+      "body": {
+        "title": "Test todo",
+        "completed": false
+      },
+      "expectedStatus": 201,
+      "expectedResponse": {
+        "success": true,
+        "data": {
+          "id": "*",
+          "title": "Test todo",
+          "completed": false
+        }
+      }
+    }
+  ],
+  
+  "supaflosho": {
+    "personas": {
+      "primary": "frontend",
+      "supporting": ["backend", "qa", "architect"]
+    },
+    "commands": {
+      "initialization": "/xt:init",
+      "implementation": "/sc:implement",
+      "testing": "/fs:flow"
+    },
+    "mcp": {
+      "context7": true,
+      "sequential": false,
+      "magic": true,
+      "playwright": true
+    }
+  }
+}
