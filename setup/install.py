@@ -11,299 +11,408 @@ import shutil
 import argparse
 import subprocess
 from pathlib import Path
-from datetime import datetime
-
-try:
-    from rich.console import Console
-    from rich.table import Table
-    from rich.progress import Progress, SpinnerColumn, TextColumn
-    from rich.prompt import Prompt, Confirm
-except ImportError:
-    print("Installing required dependencies...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "rich"])
-    from rich.console import Console
-    from rich.table import Table
-    from rich.progress import Progress, SpinnerColumn, TextColumn
-    from rich.prompt import Prompt, Confirm
-
-console = Console()
 
 class SupaFloShoInstaller:
     def __init__(self):
-        self.claude_dir = Path.home() / '.claude'
-        self.source_dir = Path(__file__).parent.parent
+        self.home_dir = Path.home()
+        self.claude_dir = self.home_dir / '.claude'
+        self.repo_dir = Path(__file__).parent.parent
+        
         self.profiles = {
             'minimal': {
                 'name': 'Minimal',
                 'components': ['core', 'commands'],
                 'description': 'Core framework with basic commands'
             },
+            'standard': {
+                'name': 'Standard',
+                'components': ['core', 'commands', 'personas', 'testing'],
+                'description': 'Standard installation with testing framework'
+            },
             'complete': {
                 'name': 'Complete',
-                'components': ['core', 'commands', 'personas', 'mcp', 'testing'],
-                'description': 'Full SupaFloSho experience (recommended)'
+                'components': ['core', 'commands', 'personas', 'testing', 'mcp', 'templates'],
+                'description': 'Everything including MCP servers and templates'
             },
             'developer': {
                 'name': 'Developer',
-                'components': ['core', 'commands', 'personas', 'mcp', 'testing', 'templates', 'examples'],
-                'description': 'Everything including development tools'
+                'components': ['core', 'commands', 'personas', 'testing', 'mcp', 'templates', 'examples'],
+                'description': 'Full installation with examples and development tools'
             }
         }
+        
         self.mcp_servers = {
             'context7': '@context7/mcp',
-            'sequential': '@modelcontextprotocol/server-sequential',
-            'magic': 'magic-ui-mcp',
-            'playwright': '@modelcontextprotocol/server-playwright'
+            'sequential': '@sequential/mcp',
+            'magic': '@magic/mcp',
+            'playwright': 'playwright'
         }
-    
+
     def print_banner(self):
-        console.print("""
-[bold cyan]╔═══════════════════════════════════════════════════╗
-║             SupaFloSho Installer v1.0             ║
-║                                                   ║
-║  Unified AI Development Framework combining:      ║
-║  • xText-PRP - Context Engineering               ║
-║  • SuperClaude - Enhanced Commands & Personas    ║
-║  • FloSho - Visual Testing & Documentation       ║
-╚═══════════════════════════════════════════════════╝[/bold cyan]
-        """)
-    
+        banner = """
+╔═══════════════════════════════════════════════════════════╗
+║                    SupaFloSho Installer                    ║
+║                                                           ║
+║  Unified AI-Driven Development Framework                  ║
+║  Combining: xText-PRP + SuperClaude + FloSho             ║
+╚═══════════════════════════════════════════════════════════╝
+        """
+        print(banner)
+
     def check_prerequisites(self):
         """Check if required tools are installed"""
-        console.print("\n[bold]Checking prerequisites...[/bold]")
+        print("\n📋 Checking prerequisites...")
         
-        checks = {
-            'Python': (lambda: sys.version_info >= (3, 7), "Python 3.7+"),
-            'Node.js': (lambda: shutil.which('node') is not None, "Node.js"),
-            'npm': (lambda: shutil.which('npm') is not None, "npm")
-        }
+        # Check Python version
+        if sys.version_info < (3, 7):
+            print("❌ Python 3.7+ required")
+            return False
+        print("✅ Python version OK")
         
-        all_good = True
-        table = Table(title="Prerequisites")
-        table.add_column("Tool", style="cyan")
-        table.add_column("Status", style="green")
-        table.add_column("Required", style="yellow")
+        # Check Node.js
+        try:
+            result = subprocess.run(['node', '--version'], capture_output=True, text=True)
+            if result.returncode == 0:
+                print("✅ Node.js installed")
+            else:
+                raise Exception()
+        except:
+            print("❌ Node.js not found - required for FloSho and MCP")
+            print("   Install from: https://nodejs.org/")
+            return False
         
-        for tool, (check_func, required) in checks.items():
-            try:
-                status = "✅" if check_func() else "❌"
-                if not check_func():
-                    all_good = False
-            except:
-                status = "❌"
-                all_good = False
-            
-            table.add_row(tool, status, required)
+        # Check npm
+        try:
+            subprocess.run(['npm', '--version'], capture_output=True, check=True)
+            print("✅ npm installed")
+        except:
+            print("❌ npm not found")
+            return False
         
-        console.print(table)
-        return all_good
-    
-    def select_profile(self):
-        """Interactive profile selection"""
-        console.print("\n[bold]Installation Profiles:[/bold]")
-        
-        table = Table()
-        table.add_column("Profile", style="cyan")
-        table.add_column("Description", style="white")
-        table.add_column("Components", style="yellow")
-        
-        for key, profile in self.profiles.items():
-            components = ", ".join(profile['components'])
-            table.add_row(profile['name'], profile['description'], components)
-        
-        console.print(table)
-        
-        profile = Prompt.ask(
-            "\nSelect installation profile",
-            choices=['minimal', 'complete', 'developer'],
-            default='complete'
-        )
-        
-        return profile
-    
-    def install_core(self, progress, task):
+        return True
+
+    def install_core(self):
         """Install core framework files"""
-        progress.update(task, description="Installing core framework...")
+        print("\n📦 Installing core framework...")
         
-        # Create Claude directory
+        # Create .claude directory
         self.claude_dir.mkdir(exist_ok=True)
         
         # Copy CLAUDE.md
-        src = self.source_dir / '.claude' / 'CLAUDE.md'
-        dst = self.claude_dir / 'CLAUDE.md'
-        if src.exists():
-            shutil.copy2(src, dst)
-            console.print("   ✅ Installed CLAUDE.md")
+        shutil.copy2(
+            self.repo_dir / '.claude' / 'CLAUDE.md',
+            self.claude_dir / 'CLAUDE.md'
+        )
+        print("✅ Installed CLAUDE.md")
         
-        # Create settings.json
-        settings = {
-            'framework': 'SupaFloSho',
-            'version': '1.0.0',
-            'installed': datetime.now().isoformat(),
-            'components': []
-        }
-        
-        settings_path = self.claude_dir / 'settings.json'
-        with open(settings_path, 'w') as f:
-            json.dump(settings, f, indent=2)
-        
-        console.print("   ✅ Created settings.json")
-    
-    def install_commands(self, progress, task):
-        """Install all command sets"""
-        progress.update(task, description="Installing commands...")
+        # Copy core documentation
+        core_files = ['COMMANDS.md', 'FLAGS.md', 'RULES.md', 'PRINCIPLES.md']
+        for file in core_files:
+            if (self.repo_dir / 'core' / file).exists():
+                shutil.copy2(
+                    self.repo_dir / 'core' / file,
+                    self.claude_dir / file
+                )
+                print(f"✅ Installed {file}")
+
+    def install_commands(self):
+        """Install all command definitions"""
+        print("\n📝 Installing commands...")
         
         commands_dir = self.claude_dir / 'commands'
         commands_dir.mkdir(exist_ok=True)
         
-        # Copy command directories
-        for cmd_type in ['context', 'superclaude', 'flosho']:
-            src = self.source_dir / '.claude' / 'commands' / cmd_type
-            dst = commands_dir / cmd_type
+        # Copy command categories
+        for category in ['context', 'superclaude', 'flosho']:
+            src_dir = self.repo_dir / '.claude' / 'commands' / category
+            dst_dir = commands_dir / category
             
-            if src.exists():
-                shutil.copytree(src, dst, dirs_exist_ok=True)
-                console.print(f"   ✅ Installed {cmd_type} commands")
-    
-    def install_personas(self, progress, task):
+            if src_dir.exists():
+                shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
+                print(f"✅ Installed {category} commands")
+
+    def install_personas(self):
         """Install persona system"""
-        progress.update(task, description="Installing personas...")
+        print("\n🎭 Installing personas...")
         
-        # This would copy persona files from SuperClaude
-        console.print("   ✅ Installed 11 AI personas")
-    
-    def install_mcp(self, progress, task):
-        """Install MCP servers"""
-        progress.update(task, description="Installing MCP servers...")
-        
-        for name, package in self.mcp_servers.items():
-            try:
-                subprocess.run(
-                    ['npm', 'install', '-g', package],
-                    check=True,
-                    capture_output=True
-                )
-                console.print(f"   ✅ Installed {name} MCP server")
-            except Exception as e:
-                console.print(f"   ⚠️  Failed to install {name}: {e}")
-    
-    def install_testing(self, progress, task):
+        shutil.copy2(
+            self.repo_dir / 'core' / 'personas' / 'PERSONAS.md',
+            self.claude_dir / 'PERSONAS.md'
+        )
+        print("✅ Installed persona system")
+
+    def install_testing(self):
         """Install FloSho testing framework"""
-        progress.update(task, description="Installing FloSho testing...")
+        print("\n🧪 Installing FloSho testing framework...")
         
         # Install npm dependencies
-        try:
-            subprocess.run(
-                ['npm', 'install'],
-                cwd=self.source_dir,
-                check=True,
-                capture_output=True
-            )
-            console.print("   ✅ Installed FloSho dependencies")
-            
-            # Install Playwright browsers
-            subprocess.run(
-                ['npx', 'playwright', 'install', 'chromium'],
-                check=True,
-                capture_output=True
-            )
-            console.print("   ✅ Installed Playwright browser")
-        except Exception as e:
-            console.print(f"   ⚠️  FloSho setup warning: {e}")
-    
+        testing_dir = self.repo_dir / 'testing'
+        os.chdir(testing_dir)
+        
+        print("📦 Installing npm packages...")
+        subprocess.run(['npm', 'install'], check=True)
+        
+        # Install Playwright browsers
+        print("🌐 Installing Playwright browsers...")
+        subprocess.run(['npx', 'playwright', 'install', 'chromium'], check=True)
+        
+        print("✅ FloSho testing framework installed")
+
+    def install_mcp(self):
+        """Install MCP servers"""
+        print("\n🔧 Installing MCP servers...")
+        
+        for name, package in self.mcp_servers.items():
+            print(f"📦 Installing {name}...")
+            try:
+                subprocess.run(['npm', 'install', '-g', package], check=True)
+                print(f"✅ Installed {name}")
+            except:
+                print(f"⚠️ Failed to install {name} - continuing...")
+        
+        # Update Claude's MCP config
+        self.update_mcp_config()
+
+    def update_mcp_config(self):
+        """Update Claude's MCP configuration"""
+        mcp_config_path = self.claude_dir / 'mcp.json'
+        
+        config = {
+            "servers": {
+                "context7": {
+                    "command": "context7-mcp",
+                    "args": []
+                },
+                "sequential": {
+                    "command": "sequential-mcp",
+                    "args": []
+                },
+                "magic": {
+                    "command": "magic-mcp",
+                    "args": []
+                },
+                "playwright": {
+                    "command": "playwright-mcp",
+                    "args": []
+                }
+            }
+        }
+        
+        with open(mcp_config_path, 'w') as f:
+            json.dump(config, f, indent=2)
+        
+        print("✅ Updated MCP configuration")
+
+    def install_templates(self):
+        """Install PRP templates"""
+        print("\n📋 Installing templates...")
+        
+        templates_dir = self.claude_dir / 'templates'
+        templates_dir.mkdir(exist_ok=True)
+        
+        src_templates = self.repo_dir / 'templates'
+        if src_templates.exists():
+            shutil.copytree(src_templates, templates_dir, dirs_exist_ok=True)
+            print("✅ Installed PRP templates")
+
+    def install_examples(self):
+        """Install example projects"""
+        print("\n📚 Installing examples...")
+        
+        examples_dir = self.claude_dir / 'examples'
+        examples_dir.mkdir(exist_ok=True)
+        
+        src_examples = self.repo_dir / 'examples'
+        if src_examples.exists():
+            shutil.copytree(src_examples, examples_dir, dirs_exist_ok=True)
+            print("✅ Installed example projects")
+
+    def create_settings(self, profile):
+        """Create SupaFloSho settings file"""
+        settings = {
+            "version": "1.0.0",
+            "profile": profile,
+            "installedComponents": self.profiles[profile]['components'],
+            "framework": {
+                "xtext": True,
+                "superclaude": True,
+                "flosho": True
+            },
+            "features": {
+                "prpIntegration": True,
+                "smartPersonas": True,
+                "visualTesting": True,
+                "autoDocumentation": True
+            }
+        }
+        
+        settings_path = self.claude_dir / 'supaflosho.json'
+        with open(settings_path, 'w') as f:
+            json.dump(settings, f, indent=2)
+        
+        print("✅ Created SupaFloSho settings")
+
     def install(self, profile='complete', interactive=False):
         """Main installation process"""
         self.print_banner()
         
         if not self.check_prerequisites():
-            console.print("\n[red]❌ Missing prerequisites. Please install required tools.[/red]")
+            print("\n❌ Prerequisites not met. Please install missing tools.")
             return False
         
         if interactive:
-            profile = self.select_profile()
+            profile = self.interactive_setup()
+        
+        print(f"\n🚀 Installing SupaFloSho ({self.profiles[profile]['name']} profile)...")
+        print(f"   {self.profiles[profile]['description']}")
         
         components = self.profiles[profile]['components']
-        console.print(f"\n[bold]Installing SupaFloSho ({self.profiles[profile]['name']} Profile)[/bold]")
-        console.print(f"Components: {', '.join(components)}")
         
-        if not Confirm.ask("\nProceed with installation?"):
-            console.print("[yellow]Installation cancelled.[/yellow]")
-            return False
-        
-        # Installation progress
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console
-        ) as progress:
-            task = progress.add_task("Installing...", total=len(components))
-            
+        try:
             if 'core' in components:
-                self.install_core(progress, task)
-                progress.advance(task)
+                self.install_core()
             
             if 'commands' in components:
-                self.install_commands(progress, task)
-                progress.advance(task)
+                self.install_commands()
             
             if 'personas' in components:
-                self.install_personas(progress, task)
-                progress.advance(task)
-            
-            if 'mcp' in components:
-                self.install_mcp(progress, task)
-                progress.advance(task)
+                self.install_personas()
             
             if 'testing' in components:
-                self.install_testing(progress, task)
-                progress.advance(task)
+                self.install_testing()
+            
+            if 'mcp' in components:
+                self.install_mcp()
+            
+            if 'templates' in components:
+                self.install_templates()
+            
+            if 'examples' in components:
+                self.install_examples()
+            
+            self.create_settings(profile)
+            
+            self.print_success()
+            return True
+            
+        except Exception as e:
+            print(f"\n❌ Installation failed: {e}")
+            return False
+
+    def interactive_setup(self):
+        """Interactive installation mode"""
+        print("\n🎯 Choose your installation profile:\n")
         
-        # Update settings with installed components
-        settings_path = self.claude_dir / 'settings.json'
-        if settings_path.exists():
-            with open(settings_path, 'r') as f:
-                settings = json.load(f)
-            settings['components'] = components
-            settings['profile'] = profile
-            with open(settings_path, 'w') as f:
-                json.dump(settings, f, indent=2)
+        profiles = list(self.profiles.items())
+        for i, (key, profile) in enumerate(profiles):
+            print(f"  {i+1}. {profile['name']} - {profile['description']}")
         
-        console.print("\n[bold green]✨ SupaFloSho installation complete![/bold green]")
-        console.print("\n[bold]Next steps:[/bold]")
-        console.print("1. Restart Claude Code")
-        console.print("2. Try: [cyan]/xt:init \"your project idea\"[/cyan]")
-        console.print("3. Read the docs: [cyan]https://github.com/a2thalex/SupaFloSho[/cyan]")
+        while True:
+            try:
+                choice = int(input("\nSelect profile (1-4): ")) - 1
+                if 0 <= choice < len(profiles):
+                    return profiles[choice][0]
+            except:
+                pass
+            print("Invalid choice. Please try again.")
+
+    def print_success(self):
+        """Print success message and next steps"""
+        success_msg = """
+╔═══════════════════════════════════════════════════════════╗
+║                 ✨ Installation Complete! ✨               ║
+╚═══════════════════════════════════════════════════════════╝
+
+SupaFloSho is ready to use! 🎉
+
+📝 Next Steps:
+1. Restart Claude Code to activate the framework
+2. Try: /xt:init "your project idea"
+3. Then: /sc:implement "feature"
+4. Test: /fs:flow "user journey"
+
+📚 Documentation:
+- User Guide: ~/.claude/examples/quick-start.md
+- Commands: ~/.claude/COMMANDS.md
+- Personas: ~/.claude/PERSONAS.md
+
+🌊 Happy coding with SupaFloSho!
+        """
+        print(success_msg)
+
+    def uninstall(self):
+        """Uninstall SupaFloSho"""
+        print("\n🗑️ Uninstalling SupaFloSho...")
         
-        return True
+        if self.claude_dir.exists():
+            # Backup user data
+            backup_dir = self.home_dir / 'supaflosho-backup'
+            backup_dir.mkdir(exist_ok=True)
+            
+            # Only backup user-created content
+            for item in ['projects', 'custom-templates']:
+                src = self.claude_dir / item
+                if src.exists():
+                    shutil.move(str(src), str(backup_dir / item))
+            
+            # Remove SupaFloSho files
+            files_to_remove = [
+                'CLAUDE.md', 'COMMANDS.md', 'PERSONAS.md', 
+                'FLAGS.md', 'RULES.md', 'supaflosho.json'
+            ]
+            
+            for file in files_to_remove:
+                file_path = self.claude_dir / file
+                if file_path.exists():
+                    file_path.unlink()
+            
+            # Remove directories
+            dirs_to_remove = ['commands', 'templates', 'examples']
+            for dir_name in dirs_to_remove:
+                dir_path = self.claude_dir / dir_name
+                if dir_path.exists():
+                    shutil.rmtree(dir_path)
+            
+            print("✅ SupaFloSho uninstalled")
+            if backup_dir.exists():
+                print(f"📁 User data backed up to: {backup_dir}")
+        else:
+            print("❌ SupaFloSho not found")
+
 
 def main():
-    parser = argparse.ArgumentParser(description='SupaFloSho Installer')
+    parser = argparse.ArgumentParser(
+        description='SupaFloSho Installer - Unified AI Development Framework'
+    )
+    
+    parser.add_argument(
+        'action',
+        choices=['install', 'uninstall'],
+        help='Action to perform'
+    )
+    
     parser.add_argument(
         '--profile',
-        choices=['minimal', 'complete', 'developer'],
+        choices=['minimal', 'standard', 'complete', 'developer'],
         default='complete',
-        help='Installation profile'
+        help='Installation profile (default: complete)'
     )
+    
     parser.add_argument(
         '--interactive',
         action='store_true',
         help='Interactive installation mode'
-    )
-    parser.add_argument(
-        '--uninstall',
-        action='store_true',
-        help='Uninstall SupaFloSho'
     )
     
     args = parser.parse_args()
     
     installer = SupaFloShoInstaller()
     
-    if args.uninstall:
-        # TODO: Implement uninstall
-        console.print("[yellow]Uninstall not yet implemented[/yellow]")
-    else:
-        installer.install(args.profile, args.interactive)
+    if args.action == 'install':
+        success = installer.install(args.profile, args.interactive)
+        sys.exit(0 if success else 1)
+    elif args.action == 'uninstall':
+        installer.uninstall()
 
 if __name__ == '__main__':
     main()

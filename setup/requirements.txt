@@ -1,0 +1,20 @@
+# SupaFloSho Python Requirements
+# For installer and utilities
+
+# Core requirements
+pathlib
+argparse
+
+# For colored output
+colorama>=0.4.6
+
+# For configuration management
+pyyaml>=6.0
+
+# For version checking
+packaging>=23.0
+
+# Development tools (optional)
+pytest>=7.0
+black>=23.0
+flake8>=6.0
